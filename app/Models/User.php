@@ -4,13 +4,29 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-class User extends Authenticatable
+use \BaoPham\DynamoDb\DynamoDbModel as Model;
+
+class User extends Model implements AuthenticatableContract
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable,Authenticatable;
+
+    protected $table = "users";
+
+    protected $dynamoDbIndexKeys = [
+        'listing_index' => [
+            'hash' => 'id',
+        ],
+    ];
+
+    protected $primaryKey = 'id';
+
+    protected $guarded = ['id'];
+
 public function getJwtIdentifier()
 {
     return $this->getKey();
@@ -28,6 +44,7 @@ public function getJWTCustomeclaims()
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'name',
         'email',
         'password',
@@ -40,7 +57,7 @@ public function getJWTCustomeclaims()
      */
     protected $hidden = [
         'password',
-        'remember_token',
+        // 'remember_token',
     ];
 
     /**
