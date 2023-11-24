@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CompanyController extends Controller
+class EventController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $company = Company::all();
-        if($company->count() > 0) {
+        $event = Event::all();
+        if($event->count() > 0) {
             return response()->json([
                 'status' => 200,
-                'company list' => $company
+                'event list' => $event
             ], 200);
         } else {
             return response()->json([
                 'status' => 404,
-                'company list' => 'record not found'
+                'event list' => 'record not found'
             ], 404);
         }
     }
@@ -42,15 +42,18 @@ class CompanyController extends Controller
                     'error' => $validator->messages()
                 ], 422);
             } else {
-                $company = new Company();
-                $company->id = $request->id;
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->save();
+                $event = new Event();
+                $event->id = $request->id;
+                $event->name = $request->name;
+                $event->slug = $request->slug;
+                $event->category = $request->category;
+                $event->timezone = $request->timezone;
+                $event->type = $request->type;
+                $event->save();
                 return response()->json([
-                'message' => 'company created',
+                'message' => 'event created',
                 'status' => 'success',
-                'data' => $company
+                'data' => $event
                 ]);
             }
     }
@@ -60,16 +63,16 @@ class CompanyController extends Controller
      */
     public function show($id)
     {
-        $company = Company::find($id);
-        if($company) {
+        $event = Event::find($id);
+        if($event) {
             return response()->json([
                 'status' => 200,
-                'company' => $company
+                'event' => $event
             ], 200);
         } else {
             return response()->json([
                 'status' => 404,
-                'message' => "no such company found!"
+                'message' => "no such event found!"
             ], 404);
         }
     }
@@ -89,14 +92,17 @@ class CompanyController extends Controller
                 'error' => $validator->messages()
             ], 422);
         } else {
-            $company = Company::find($id);
-            if($company) {
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->update();
+            $event = Event::find($id);
+            if($event) {
+                $event->name = $request->name;
+                $event->slug = $request->slug;
+                $event->category = $request->category;
+                $event->timezone = $request->timezone;
+                $event->type = $request->type;
+                $event->update();
                 return response()->json([
                     'status' => 200,
-                    'message' => 'company updated',
+                    'message' => 'event updated',
                     ], 200);
             } else {
                 return response()->json([
@@ -112,17 +118,17 @@ class CompanyController extends Controller
      */
     public function destroy( $id)
     {
-        $company = Company::find($id);
-        if($company) {
-            $company->delete();
+        $event = Event::find($id);
+        if($event) {
+            $event->delete();
             return response()->json([
                 'status' => 200,
-                'message' => "company deleted."
+                'message' => "event deleted."
             ], 200);
         } else {
             return response()->json([
                 'status' => 404,
-                'message' => "company not deleted."
+                'message' => "event not deleted."
             ], 404);
         }
     }

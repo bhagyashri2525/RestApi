@@ -2,29 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
+use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CompanyController extends Controller
+class ReportController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $company = Company::all();
-        if($company->count() > 0) {
+        $report = Report::all();
+        if($report->count() > 0) {
             return response()->json([
                 'status' => 200,
-                'company list' => $company
+                'report list' => $report
             ], 200);
-        } else {
-            return response()->json([
-                'status' => 404,
-                'company list' => 'record not found'
-            ], 404);
-        }
+        } 
     }
 
     /**
@@ -34,7 +29,7 @@ class CompanyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:100',
+            'email' => 'required|email|max:100',
             ]);
             if($validator->fails()) {
                 return response()->json([
@@ -42,15 +37,16 @@ class CompanyController extends Controller
                     'error' => $validator->messages()
                 ], 422);
             } else {
-                $company = new Company();
-                $company->id = $request->id;
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->save();
+                $report = new Report();
+                $report->id = $request->id;
+                $report->name = $request->name;
+                $report->email = $request->email;
+                $report->start_time = $request->start_time;
+                $report->save();
                 return response()->json([
-                'message' => 'company created',
+                'message' => 'report created',
                 'status' => 'success',
-                'data' => $company
+                'data' => $report
                 ]);
             }
     }
@@ -60,16 +56,16 @@ class CompanyController extends Controller
      */
     public function show($id)
     {
-        $company = Company::find($id);
-        if($company) {
+        $report = Report::find($id);
+        if($report) {
             return response()->json([
                 'status' => 200,
-                'company' => $company
+                'report' => $report
             ], 200);
         } else {
             return response()->json([
                 'status' => 404,
-                'message' => "no such company found!"
+                'message' => "no such report found!"
             ], 404);
         }
     }
@@ -81,7 +77,7 @@ class CompanyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:100',
+            'email' => 'required|email|max:100',
             ]);
         if($validator->fails()) {
             return response()->json([
@@ -89,14 +85,15 @@ class CompanyController extends Controller
                 'error' => $validator->messages()
             ], 422);
         } else {
-            $company = Company::find($id);
-            if($company) {
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->update();
+            $report = Report::find($id);
+            if($report) {
+                $report->name = $request->name;
+                $report->email = $request->email;
+                $report->start_time = $request->start_time;
+                $report->update();
                 return response()->json([
                     'status' => 200,
-                    'message' => 'company updated',
+                    'message' => 'report updated',
                     ], 200);
             } else {
                 return response()->json([
@@ -112,17 +109,17 @@ class CompanyController extends Controller
      */
     public function destroy( $id)
     {
-        $company = Company::find($id);
-        if($company) {
-            $company->delete();
+        $report = Report::find($id);
+        if($report) {
+            $report->delete();
             return response()->json([
                 'status' => 200,
-                'message' => "company deleted."
+                'message' => "report deleted."
             ], 200);
         } else {
             return response()->json([
                 'status' => 404,
-                'message' => "company not deleted."
+                'message' => "report not deleted."
             ], 404);
         }
     }

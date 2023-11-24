@@ -2,29 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
+use App\Models\Zoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CompanyController extends Controller
+class ZoomController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $company = Company::all();
-        if($company->count() > 0) {
+        $zoom = Zoom::all();
+        if($zoom->count() > 0) {
             return response()->json([
                 'status' => 200,
-                'company list' => $company
+                'zoom list' => $zoom
             ], 200);
-        } else {
-            return response()->json([
-                'status' => 404,
-                'company list' => 'record not found'
-            ], 404);
-        }
+        } 
     }
 
     /**
@@ -42,15 +37,17 @@ class CompanyController extends Controller
                     'error' => $validator->messages()
                 ], 422);
             } else {
-                $company = new Company();
-                $company->id = $request->id;
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->save();
+                $zoom = new Zoom();
+                $zoom->id = $request->id;
+                $zoom->name = $request->name;
+                $zoom->url = $request->url;
+                $zoom->email = $request->email;
+                $zoom->start_time = $request->start_time;
+                $zoom->save();
                 return response()->json([
-                'message' => 'company created',
+                'message' => 'zoom created',
                 'status' => 'success',
-                'data' => $company
+                'data' => $zoom
                 ]);
             }
     }
@@ -60,16 +57,16 @@ class CompanyController extends Controller
      */
     public function show($id)
     {
-        $company = Company::find($id);
-        if($company) {
+        $zoom = Zoom::find($id);
+        if($zoom) {
             return response()->json([
                 'status' => 200,
-                'company' => $company
+                'zoom' => $zoom
             ], 200);
         } else {
             return response()->json([
                 'status' => 404,
-                'message' => "no such company found!"
+                'message' => "no such zoom found!"
             ], 404);
         }
     }
@@ -81,7 +78,7 @@ class CompanyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:100',
+            'email' => 'required|email|max:100',
             ]);
         if($validator->fails()) {
             return response()->json([
@@ -89,14 +86,16 @@ class CompanyController extends Controller
                 'error' => $validator->messages()
             ], 422);
         } else {
-            $company = Company::find($id);
-            if($company) {
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->update();
+            $zoom = Zoom::find($id);
+            if($zoom) {
+                $zoom->name = $request->name;
+                $zoom->url = $request->url;
+                $zoom->email = $request->email;
+                $zoom->start_time = $request->start_time;
+                $zoom->update();
                 return response()->json([
                     'status' => 200,
-                    'message' => 'company updated',
+                    'message' => 'zoom updated',
                     ], 200);
             } else {
                 return response()->json([
@@ -112,17 +111,17 @@ class CompanyController extends Controller
      */
     public function destroy( $id)
     {
-        $company = Company::find($id);
-        if($company) {
-            $company->delete();
+        $zoom = Zoom::find($id);
+        if($zoom) {
+            $zoom->delete();
             return response()->json([
                 'status' => 200,
-                'message' => "company deleted."
+                'message' => "zoom deleted."
             ], 200);
         } else {
             return response()->json([
                 'status' => 404,
-                'message' => "company not deleted."
+                'message' => "zoom not deleted."
             ], 404);
         }
     }
