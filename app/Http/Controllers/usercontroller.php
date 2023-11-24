@@ -11,8 +11,7 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     //get
-    public function index()
-    {
+    public function index(){
         $user = User::all();
         if($user->count() > 0) {
             return response()->json([
@@ -24,7 +23,6 @@ class UserController extends Controller
                 'status' => 404,
                 'user list' => 'record not found'
             ], 404);
-
         }
     }
 
@@ -46,6 +44,7 @@ class UserController extends Controller
             $user->name = $request->name;
             $user->email = $request->email;
             $user->password = $request->password;
+            $user->save();
             return response()->json([
             'message' => 'user created',
             'status' => 'success',
@@ -74,7 +73,7 @@ class UserController extends Controller
     }
 
     //update by id
-    public function update(Request $request, int $id)
+    public function update(Request $request,  $id)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
