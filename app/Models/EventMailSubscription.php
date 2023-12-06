@@ -1,14 +1,16 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use \BaoPham\DynamoDb\DynamoDbModel as Model;
 
-class Report extends Model
+class EventMailSubscription extends Model
 {
     use HasFactory;
-    protected $table = "report";
+
+    const TABLE = "event_mail_subscriptions";
+
+    protected $table = "event_mail_subscriptions";
 
     protected $dynamoDbIndexKeys = [
         'listing_index' => [
@@ -20,13 +22,17 @@ class Report extends Model
 
     protected $guarded = ['id'];
 
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'id',
-        'name',      
+        'company_id',
+        'event_id',
         'email',
-        'start_time'
+        'reason',
+        'subscribed',
     ];
-
 }
-

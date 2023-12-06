@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use \BaoPham\DynamoDb\DynamoDbModel as Model;
 
-class Zoom extends Model
+class MasterCompany extends Model
 {
     use HasFactory;
-    protected $table = "zoom";
+
+    protected $table = "master_companies";
+
+    const TABLE = "master_companies";
+
 
     protected $dynamoDbIndexKeys = [
         'listing_index' => [
@@ -20,13 +24,16 @@ class Zoom extends Model
 
     protected $guarded = ['id'];
 
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'id',
         'name',
-        'email',
-        'start_time',
-        'url',
+        'slug',
+        'zoom_integration',
     ];
-
 }
+?>

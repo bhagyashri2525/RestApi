@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Services\Utils\ApiService as API;
+use Exception;
+use App\Services\Company\CompanyService;
 
 class CompanyController extends Controller
 {
@@ -26,104 +29,101 @@ class CompanyController extends Controller
             ], 404);
         }
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:100',
+        try {
+            $validator = Validator::make($request->all(), [
+                'display_name' => ['required', 'max:50'],
+                'slug' => ['required', 'max:50'],
+                'code' => ['required', 'max:50'],
+                'is_active' => ['required', 'integer', 'min:0', 'max:1'],
+                'description' => ['nullable', 'max:255'],
             ]);
-            if($validator->fails()) {
-                return response()->json([
-                    'status' => 422,
-                    'error' => $validator->messages()
-                ], 422);
-            } else {
-                $company = new Company();
-                $company->id = $request->id;
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->save();
-                return response()->json([
-                'message' => 'company created',
-                'status' => 'success',
-                'data' => $company
-                ]);
+
+            if ($validator->fails()) {
+                return API::response(API::FAIL, [], $validator->messages()->first());
             }
+
+            $existCompany = Company::where(['display_name' => $request->display_name])->first();
+            if (!empty($existCompany)) {
+                return API::response(API::FAIL, [], 'Company name already exist.');
+            }
+
+            $existCompany = Company::where(['slug' => $request->slug])->first();
+            if (!empty($existCompany)) {
+                return API::response(API::FAIL, [], 'Company slug already exist.');
+            }
+
+            $request->request->add(['is_active' => $request->is_active == 1 ? true : false]);
+
+            //Adding company type
+            $request->request->add(['type' => Company::COMPANY_TYPES['genuine']]);
+
+            $company = (new CompanyService())->store($request->all());
+            return API::response(!empty($company) ? API::SUCCESS : API::FAIL, $company);
+        } catch (Exception $e) {
+            if (env('APP_DEBUG')) {
+                print_r($e->getMessage());
+                // Log::error($e->getMessage());
+            }
+            return API::response(API::ERROR);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        $company = Company::find($id);
-        if($company) {
-            return response()->json([
-                'status' => 200,
-                'company' => $company
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => 404,
-                'message' => "no such company found!"
-            ], 404);
-        }
+        $company = (new CompanyService())->details($id);
+        $status = !empty($company) ? API::SUCCESS : API::NOT_FOUND;
+        return API::response($status, $company);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
+   
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:100',
+        try {
+            $validator = Validator::make($request->all(), [
+                'display_name' => ['required', 'max:50'],
+                'slug' => ['required', 'max:50'],
+                'code' => ['required', 'max:50'],
+                'description' => ['nullable', 'max:255'],
             ]);
-        if($validator->fails()) {
-            return response()->json([
-                'status' => 422,
-                'error' => $validator->messages()
-            ], 422);
-        } else {
-            $company = Company::find($id);
-            if($company) {
-                $company->name = $request->name;
-                $company->slug = $request->slug;
-                $company->update();
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'company updated',
-                    ], 200);
-            } else {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'something went wrong!',
-                    ], 404);
+
+            if ($validator->fails()) {
+                return API::response(API::FAIL, [], $validator->messages()->first());
             }
+
+            $existCompany = Company::where(['slug' => $request->slug,'display_name' => $request->display_name])
+                ->where('id', '!=', $id)
+                ->first();
+            if (!empty($existCompany)) {
+                return API::response(API::FAIL, [], 'Company slug already exist.');
+            }
+
+            $request->request->add(['is_active' => $request->is_active == 1 ? true : false]);
+
+            $companyRecord = (new CompanyService())->update($id, $request->all());
+            $status = !empty($companyRecord) ? API::SUCCESS : API::FAIL;
+            return API::response($status, $companyRecord);
+        } catch (Exception $e) {
+            if (env('APP_DEBUG')) {
+                print_r($e->getMessage());
+                // Log::error($e->getMessage());
+            }
+            return API::response(API::ERROR);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy( $id)
+    public function destroy($id)
     {
-        $company = Company::find($id);
-        if($company) {
-            $company->delete();
-            return response()->json([
-                'status' => 200,
-                'message' => "company deleted."
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => 404,
-                'message' => "company not deleted."
-            ], 404);
+        try {
+            $company = Company::where(['id' => $id])->first();
+            if (!empty($company)) {
+                $company->delete();
+                return API::response(API::SUCCESS);
+            }
+            return API::response(API::FAIL);
+        } catch (Exception $e) {
+            return API::response(API::ERROR);
         }
     }
 }
